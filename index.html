@@ -1,879 +1,658 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <title>Threes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="assets/favicon.ico" />
-  
-  <style>
-    /* ORİJİNAL STİL DOSYASI (style.css) 
-       Yollar 'index.html' konumuna göre (../ kaldırıldı) düzeltilmiştir.
-    */
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap');
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      /* DÜZELTME: Resim yolu assets klasörüne doğrudan bakacak şekilde ayarlandı */
-      background: #faf8ef url('assets/images/playBG.png') repeat;
-      color: #776e65;
-      font-family: "Nunito", "Clear Sans", "Helvetica Neue", Arial, sans-serif;
-      font-size: 18px;
-    }
-
-    body {
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-
-    .heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    h1.title {
-      font-size: 60px;
-      font-weight: bold;
-      margin: 0;
-      display: block;
-      float: left;
-    }
-
-    .game-container {
-      margin-top: 40px;
-      position: relative;
-      padding: 15px;
-      cursor: default;
-      -webkit-touch-callout: none;
-      -ms-touch-action: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      touch-action: none;
-      background: #bbada0;
-      border-radius: 6px;
-      width: 500px;
-      height: 500px;
-      box-sizing: border-box;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .grid-container {
-      position: absolute;
-      z-index: 1;
-    }
-
-    .grid-row {
-      margin-bottom: 15px;
-    }
-
-    .grid-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .grid-row:after {
-      content: "";
-      display: block;
-      clear: both;
-    }
-
-    .grid-cell {
-      width: 106.25px;
-      height: 106.25px;
-      margin-right: 15px;
-      float: left;
-      border-radius: 3px;
-      background: rgba(238, 228, 218, 0.35);
-    }
-
-    .grid-cell:last-child {
-      margin-right: 0;
-    }
-
-    .tile-container {
-      position: absolute;
-      z-index: 2;
-    }
-
-    .tile, .tile .tile-inner {
-      width: 107px;
-      height: 107px;
-      line-height: 107px;
-    }
-
-    .tile {
-      position: absolute;
-      transition: 100ms ease-in-out;
-      transition-property: transform;
-      will-change: transform; /* Performans: GPU kullanımı */
-      transform: translateZ(0); 
-    }
-
-    .tile .tile-inner {
-      border-radius: 3px;
-      background: #eee4da;
-      text-align: center;
-      font-weight: bold;
-      z-index: 10;
-      font-size: 55px;
-    }
-
-    /* Colors */
-    .tile.tile-1 .tile-inner { background: #66CCFF; color: #fff; }
-    .tile.tile-2 .tile-inner { background: #FF6680; color: #fff; }
-    .tile.tile-3 .tile-inner { background: #ffffff; color: #776E65; }
-    .tile.tile-6 .tile-inner { background: #f2b179; color: #f9f6f2; }
-    .tile.tile-12 .tile-inner { background: #f59563; color: #f9f6f2; }
-    .tile.tile-24 .tile-inner { background: #f67c5f; color: #f9f6f2; }
-    .tile.tile-48 .tile-inner { background: #f65e3b; color: #f9f6f2; }
-    .tile.tile-96 .tile-inner { background: #edcf72; color: #f9f6f2; }
-    .tile.tile-super .tile-inner { background: #3c3a32; color: #f9f6f2; font-size: 30px; }
-
-    .tile-new .tile-inner { animation: appear 200ms ease 100ms backwards; }
-    .tile-merged .tile-inner { z-index: 20; animation: pop 200ms ease 100ms backwards; }
-
-    /* Positioning */
-    .tile.tile-position-1-1 { transform: translate(0px, 0px); }
-    .tile.tile-position-1-2 { transform: translate(0px, 121px); }
-    .tile.tile-position-1-3 { transform: translate(0px, 242px); }
-    .tile.tile-position-1-4 { transform: translate(0px, 363px); }
-    .tile.tile-position-2-1 { transform: translate(121px, 0px); }
-    .tile.tile-position-2-2 { transform: translate(121px, 121px); }
-    .tile.tile-position-2-3 { transform: translate(121px, 242px); }
-    .tile.tile-position-2-4 { transform: translate(121px, 363px); }
-    .tile.tile-position-3-1 { transform: translate(242px, 0px); }
-    .tile.tile-position-3-2 { transform: translate(242px, 121px); }
-    .tile.tile-position-3-3 { transform: translate(242px, 242px); }
-    .tile.tile-position-3-4 { transform: translate(242px, 363px); }
-    .tile.tile-position-4-1 { transform: translate(363px, 0px); }
-    .tile.tile-position-4-2 { transform: translate(363px, 121px); }
-    .tile.tile-position-4-3 { transform: translate(363px, 242px); }
-    .tile.tile-position-4-4 { transform: translate(363px, 363px); }
-
-    .game-message {
-      display: none;
-      position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: rgba(238, 228, 218, 0.73);
-      z-index: 100;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      animation: fade-in 800ms ease 1200ms both;
-    }
-    .game-message.game-won, .game-message.game-over { display: flex; }
-    .game-message p { font-size: 60px; font-weight: bold; margin-top: 222px; }
-
-    .score-container, .best-container {
-      position: relative; display: inline-block; background: #bbada0;
-      padding: 15px 25px; font-size: 25px; height: 25px; line-height: 47px;
-      font-weight: bold; border-radius: 3px; color: white; margin-top: 8px; text-align: center;
-    }
-    .score-container:after { content: "Score"; position: absolute; width: 100%; top: 10px; left: 0; text-transform: uppercase; font-size: 13px; color: #eee4da; line-height: 13px; text-align: center; }
-    .best-container:after { content: "Best"; position: absolute; width: 100%; top: 10px; left: 0; text-transform: uppercase; font-size: 13px; color: #eee4da; line-height: 13px; text-align: center; }
-
-    .score-addition {
-        position: absolute;
-        right: 30px;
-        color: red;
-        font-size: 25px;
-        line-height: 25px;
-        font-weight: bold;
-        color: rgba(119, 110, 101, 0.9);
-        z-index: 100;
-        animation: move-up 600ms ease-in both;
-    }
-
-    .next-tile-container { display: flex; align-items: center; margin: 10px 0; }
-    .next-tile { width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 3px; font-weight: bold; color: white; font-size: 18px; }
-
-    @keyframes appear { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1); } }
-    @keyframes pop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
-    @keyframes move-up { 0% { top: 25px; opacity: 1; } 100% { top: -50px; opacity: 0; } }
-
-    @media screen and (max-width: 520px) {
-      html, body { font-size: 15px; }
-      body { margin: 20px 0; padding: 0 20px; }
-      h1.title { font-size: 27px; margin-top: 15px; }
-      .game-container { margin-top: 20px; width: 280px; height: 280px; padding: 10px; }
-      .grid-cell { width: 57.5px; height: 57.5px; margin-right: 10px; }
-      .tile, .tile .tile-inner { width: 57.5px; height: 57.5px; line-height: 57.5px; }
-      /* Mobil pozisyonlar */
-      .tile.tile-position-1-1 { transform: translate(0px, 0px); }
-      .tile.tile-position-1-2 { transform: translate(0px, 67px); }
-      .tile.tile-position-1-3 { transform: translate(0px, 135px); }
-      .tile.tile-position-1-4 { transform: translate(0px, 202px); }
-      .tile.tile-position-2-1 { transform: translate(67px, 0px); }
-      .tile.tile-position-2-2 { transform: translate(67px, 67px); }
-      .tile.tile-position-2-3 { transform: translate(67px, 135px); }
-      .tile.tile-position-2-4 { transform: translate(67px, 202px); }
-      .tile.tile-position-3-1 { transform: translate(135px, 0px); }
-      .tile.tile-position-3-2 { transform: translate(135px, 67px); }
-      .tile.tile-position-3-3 { transform: translate(135px, 135px); }
-      .tile.tile-position-3-4 { transform: translate(135px, 202px); }
-      .tile.tile-position-4-1 { transform: translate(202px, 0px); }
-      .tile.tile-position-4-2 { transform: translate(202px, 67px); }
-      .tile.tile-position-4-3 { transform: translate(202px, 135px); }
-      .tile.tile-position-4-4 { transform: translate(202px, 202px); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="heading">
-      <h1 class="title">Threes</h1>
-      <div class="scores-container">
-        <div class="score-container">0</div>
-        <div class="best-container">0</div>
-      </div>
-    </div>
-
-    <div class="next-tile-container">
-    </div>
-
-    <div class="game-container">
-      <div class="game-message">
-        <p></p>
-        <div class="lower">
-          <a class="keep-playing-button">Keep playing</a>
-          <a class="retry-button">Try again</a>
-        </div>
-      </div>
-
-      <div class="grid-container">
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-        <div class="grid-row"><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div></div>
-      </div>
-
-      <div class="tile-container"></div>
-    </div>
-
-    <p>
-      <strong>How to play:</strong> Use your <strong>arrow keys</strong> to move the tiles. <br>
-      <strong>Rules:</strong> 1+2 = 3. 3+3 = 6. X+X = 2X.
-    </p>
-  </div>
-
-  <script>
-    // --- TILE CLASS ---
-    class Tile {
-        constructor(position, value) {
-            this.x = position.x;
-            this.y = position.y;
-            this.value = value || 2;
-            this.previousPosition = null;
-            this.mergedFrom = null;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Threes! + Skor Tablosu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #faf8ef;
+            overflow: hidden; /* Prevent scrolling on mobile */
+            touch-action: none;
         }
 
-        savePosition() {
-            this.previousPosition = { x: this.x, y: this.y };
+        .game-container {
+            background-color: #bbada0;
+            border-radius: 6px;
+            width: 300px;
+            height: 300px;
+            position: relative;
+            padding: 10px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 10px;
+            touch-action: none;
         }
 
-        updatePosition(position) {
-            this.x = position.x;
-            this.y = position.y;
+        .grid-cell {
+            background-color: rgba(238, 228, 218, 0.35);
+            border-radius: 3px;
+            width: 100%;
+            height: 100%;
         }
+
+        .tile {
+            position: absolute;
+            width: 62.5px; /* (300 - 50) / 4 */
+            height: 62.5px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24px;
+            transition: transform 0.15s ease-in-out;
+            z-index: 10;
+        }
+
+        /* Tile Colors */
+        .tile-1 { background: #60d6fa; color: white; }
+        .tile-2 { background: #ff5c77; color: white; }
+        .tile-3 { background: #ffffff; color: #333; }
+        .tile-6 { background: #ffffff; color: #333; }
+        .tile-12 { background: #ffffff; color: #333; border: 1px solid #eee; }
+        .tile-24, .tile-48, .tile-96 { background: #f2b179; color: white; }
+        .tile-192, .tile-384 { background: #f59563; color: white; }
         
-        serialize() {
-            return { position: { x: this.x, y: this.y }, value: this.value };
+        .scoreboard-entry {
+            transition: all 0.2s;
         }
-    }
-
-    // --- GRID CLASS ---
-    class Grid {
-        constructor(size = 4) {
-            this.size = size;
-            this.cells = this.empty();
+        .scoreboard-entry:hover {
+            background-color: #f3f4f6;
         }
 
-        empty() {
-            const cells = [];
-            for (let x = 0; x < this.size; x++) {
-                const row = cells[x] = [];
-                for (let y = 0; y < this.size; y++) {
-                    row.push(null);
-                }
-            }
-            return cells;
+        /* Modal Overlay */
+        #nameModal {
+            backdrop-filter: blur(5px);
         }
 
-        randomAvailableCell() {
-            const cells = this.availableCells();
-            if (cells.length) {
-                return cells[Math.floor(Math.random() * cells.length)];
-            }
+        /* Shake animation for invalid moves */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
         }
-
-        availableCells() {
-            const cells = [];
-            this.eachCell((x, y, tile) => {
-                if (!tile) {
-                    cells.push({ x: x, y: y });
-                }
-            });
-            return cells;
+        .shake {
+            animation: shake 0.3s;
         }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col md:flex-row items-center justify-center p-4 bg-gray-50 text-gray-800">
 
-        eachCell(callback) {
-            for (let x = 0; x < this.size; x++) {
-                for (let y = 0; y < this.size; y++) {
-                    callback(x, y, this.cells[x][y]);
-                }
-            }
-        }
+    <!-- Game Section -->
+    <div class="flex flex-col items-center space-y-4 w-full md:w-auto">
+        <div class="flex justify-between w-[300px] items-end">
+            <div>
+                <h1 class="text-4xl font-extrabold text-gray-700">Threes!</h1>
+                <p class="text-sm text-gray-500">Birleştir: 1+2=3</p>
+            </div>
+            <div class="text-right">
+                <div class="text-xs font-bold text-gray-400 uppercase">Skor</div>
+                <div class="text-2xl font-bold text-gray-700" id="current-score">0</div>
+            </div>
+        </div>
 
-        cellsAvailable() {
-            return !!this.availableCells().length;
-        }
+        <div class="relative">
+            <div class="game-container" id="grid-container">
+                <!-- Grid Cells created by JS -->
+            </div>
+            <div id="tile-container">
+                <!-- Tiles injected by JS -->
+            </div>
+            
+            <!-- Next Tile Indicator -->
+            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white px-3 py-1 rounded shadow text-xs font-bold flex items-center gap-2">
+                Sonraki: <span id="next-tile-indicator" class="w-4 h-4 rounded inline-block bg-blue-400"></span>
+            </div>
+        </div>
 
-        cellAvailable(cell) {
-            return !this.cellOccupied(cell);
-        }
+        <button onclick="resetGame()" class="w-[300px] py-3 bg-gray-800 text-white font-bold rounded shadow hover:bg-gray-700 transition flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/><path d="M3 3v9h9"/></svg>
+            Tekrar Başla
+        </button>
+        
+        <p class="text-xs text-gray-400 w-[300px] text-center">
+            Ok tuşlarını veya parmağını kullanarak taşları kaydır.
+        </p>
+    </div>
 
-        cellOccupied(cell) {
-            return !!this.cellContent(cell);
-        }
+    <!-- Scoreboard Section -->
+    <div class="mt-8 md:mt-0 md:ml-12 w-full md:w-80 h-[500px] bg-white rounded-lg shadow-lg flex flex-col overflow-hidden border border-gray-200">
+        <div class="p-4 bg-gray-50 border-b border-gray-200">
+            <h2 class="text-lg font-bold text-gray-700 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                Lider Tablosu
+            </h2>
+        </div>
+        <div id="scoreboard-list" class="flex-1 overflow-y-auto p-2 space-y-1">
+            <div class="text-center text-gray-400 py-10">Veriler yükleniyor...</div>
+        </div>
+        <div class="p-2 text-xs text-center text-gray-400 border-t bg-gray-50">
+            Gerçek zamanlı güncellenir.
+        </div>
+    </div>
 
-        cellContent(cell) {
-            if (this.withinBounds(cell)) {
-                return this.cells[cell.x][cell.y];
+    <!-- Name Input Modal -->
+    <div id="nameModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-2xl w-80 transform transition-all scale-100">
+            <h3 class="text-xl font-bold mb-2 text-gray-800">Harika Skor!</h3>
+            <p class="text-gray-600 mb-4 text-sm">Lider tablosuna girmek için ismini bahşet.</p>
+            <input type="text" id="playerName" placeholder="İsminiz (Örn: Soul)" class="w-full border border-gray-300 rounded p-2 mb-4 focus:outline-none focus:border-blue-500" maxlength="15">
+            <button onclick="submitScore()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 rounded transition">
+                Kaydet
+            </button>
+            <button onclick="closeModal()" class="w-full mt-2 text-gray-500 text-sm hover:text-gray-700">
+                Kaydetmeden Geç
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- Firebase Config & Init ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = __app_id || 'default-threes';
+        let currentUser = null;
+
+        // Auth Flow
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
             } else {
-                return null;
+                await signInAnonymously(auth);
             }
-        }
+        };
+        
+        initAuth();
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) loadScores();
+        });
 
-        insertTile(tile) {
-            this.cells[tile.x][tile.y] = tile;
-        }
+        // --- Game Logic Constants ---
+        const SIZE = 4;
+        const CELL_SIZE = 65; // px + margin logic approximated
+        const GAP = 10;
+        
+        let grid = [];
+        let score = 0;
+        let nextTileValue = 1;
+        let gameOver = false;
 
-        removeTile(tile) {
-            this.cells[tile.x][tile.y] = null;
-        }
+        // UI References
+        const gridEl = document.getElementById('grid-container');
+        const tileContainer = document.getElementById('tile-container');
+        const scoreEl = document.getElementById('current-score');
+        const nextTileIndicator = document.getElementById('next-tile-indicator');
+        const modal = document.getElementById('nameModal');
+        const nameInput = document.getElementById('playerName');
 
-        withinBounds(position) {
-            return position.x >= 0 && position.x < this.size &&
-                position.y >= 0 && position.y < this.size;
-        }
-    }
+        // --- Game Engine ---
 
-    // --- INPUT MANAGER ---
-    class InputManager {
-        constructor() {
-            this.events = {};
-            if (window.navigator.msPointerEnabled) {
-                this.eventTouchstart = "MSPointerDown";
-                this.eventTouchmove = "MSPointerMove";
-                this.eventTouchend = "MSPointerUp";
-            } else {
-                this.eventTouchstart = "touchstart";
-                this.eventTouchmove = "touchmove";
-                this.eventTouchend = "touchend";
+        function initGame() {
+            // Create background grid cells
+            gridEl.innerHTML = '';
+            for(let i=0; i<16; i++) {
+                let cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                gridEl.appendChild(cell);
             }
-            this.listen();
+            resetGame();
+            setupInput();
         }
 
-        on(event, callback) {
-            if (!this.events[event]) {
-                this.events[event] = [];
-            }
-            this.events[event].push(callback);
-        }
-
-        emit(event, data) {
-            const callbacks = this.events[event];
-            if (callbacks) {
-                callbacks.forEach(callback => {
-                    callback(data);
-                });
-            }
-        }
-
-        listen() {
-            const self = this;
-            const map = {
-                38: 0, 39: 1, 40: 2, 37: 3, 
-                75: 0, 76: 1, 74: 2, 72: 3, 
-                87: 0, 68: 1, 83: 2, 65: 3  
-            };
-
-            document.addEventListener("keydown", function (event) {
-                const modifiers = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
-                const mapped = map[event.which];
-                if (!modifiers) {
-                    if (mapped !== undefined) {
-                        event.preventDefault();
-                        self.emit("move", mapped);
-                    }
-                }
-                if (!modifiers && event.which === 82) {
-                    self.restart.call(self, event);
-                }
-            });
-
-            let touchStartClientX, touchStartClientY;
-            const gameContainer = document.querySelector(".game-container");
-
-            gameContainer.addEventListener(this.eventTouchstart, function (event) {
-                if ((!window.navigator.msPointerEnabled && event.touches.length > 1) || event.targetTouches > 1) return;
-                if (window.navigator.msPointerEnabled) {
-                    touchStartClientX = event.pageX; touchStartClientY = event.pageY;
-                } else {
-                    touchStartClientX = event.touches[0].clientX; touchStartClientY = event.touches[0].clientY;
-                }
-                event.preventDefault();
-            }, { passive: false });
-
-            gameContainer.addEventListener(this.eventTouchmove, function (event) {
-                event.preventDefault();
-            }, { passive: false });
-
-            gameContainer.addEventListener(this.eventTouchend, function (event) {
-                if ((!window.navigator.msPointerEnabled && event.touches.length > 0) || event.targetTouches > 0) return;
-                let touchEndClientX, touchEndClientY;
-                if (window.navigator.msPointerEnabled) {
-                    touchEndClientX = event.pageX; touchEndClientY = event.pageY;
-                } else {
-                    touchEndClientX = event.changedTouches[0].clientX; touchEndClientY = event.changedTouches[0].clientY;
-                }
-                const dx = touchEndClientX - touchStartClientX;
-                const absDx = Math.abs(dx);
-                const dy = touchEndClientY - touchStartClientY;
-                const absDy = Math.abs(dy);
-
-                if (Math.max(absDx, absDy) > 10) {
-                    self.emit("move", absDx > absDy ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0));
-                }
-            });
-        }
-
-        restart(event) {
-            event.preventDefault();
-            this.emit("restart");
-        }
-
-        keepPlaying(event) {
-            event.preventDefault();
-            this.emit("keepPlaying");
-        }
-    }
-
-    // --- HTML ACTUATOR (RE-OPTIMIZED & FIXED) ---
-    class HTMLActuator {
-        constructor() {
-            this.tileContainer = document.querySelector(".tile-container");
-            this.scoreContainer = document.querySelector(".score-container");
-            this.bestContainer = document.querySelector(".best-container");
-            this.messageContainer = document.querySelector(".game-message");
-            this.nextTileContainer = document.querySelector(".next-tile-container");
-
-            this.score = 0;
-            this.tileMap = new Map(); 
-        }
-
-        actuate(grid, metadata) {
-            window.requestAnimationFrame(() => {
-                const processedTiles = new Set();
-
-                grid.cells.forEach(column => {
-                    column.forEach(cell => {
-                        if (cell) {
-                            this.syncTile(cell, processedTiles);
-                        }
-                    });
-                });
-
-                // Temizlik: Artık sahnede olmayan kartları kaldır
-                this.tileMap.forEach((element, tile) => {
-                    if (!processedTiles.has(tile)) {
-                        // Eğer merge işlemi için kullanıldıysa hemen silme, animasyon bitsin
-                        // Ancak burada basitlik adına direkt DOM'dan siliyoruz çünkü 'merged' class'ı işi görüyor
-                        if (element.parentNode) {
-                            element.parentNode.removeChild(element);
-                        }
-                        this.tileMap.delete(tile);
-                    }
-                });
-
-                this.updateScore(metadata.score);
-                this.updateBestScore(metadata.bestScore);
-                this.updateNextTile(metadata.nextTile);
-
-                if (metadata.terminated) {
-                    if (metadata.over) {
-                        this.message(false); 
-                    } else if (metadata.won) {
-                        this.message(true); 
-                    }
-                }
-            });
-        }
-
-        syncTile(tile, processedTiles) {
-            processedTiles.add(tile);
-            let wrapper = this.tileMap.get(tile);
-
-            // Pozisyon sınıfını hesapla
-            const position = tile.previousPosition || { x: tile.x, y: tile.y };
-            const positionClass = this.positionClass(position);
+        window.resetGame = function() {
+            grid = Array(SIZE).fill().map(() => Array(SIZE).fill(null));
+            score = 0;
+            gameOver = false;
+            updateScore(0);
             
-            // Temel sınıflar
-            const classes = ["tile", "tile-" + tile.value, positionClass];
-            if (tile.value > 2048) classes.push("tile-super");
+            // Initial tiles (usually 9 random tiles in Threes)
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
+            addRandomTile();
 
-            if (!wrapper) {
-                // YENİ OLUŞTURMA
-                wrapper = document.createElement("div");
-                const inner = document.createElement("div");
+            setNextTile();
+            drawGrid();
+        }
 
-                if (tile.mergedFrom) {
-                    classes.push("tile-merged");
-                } else if (!tile.previousPosition) {
-                    classes.push("tile-new");
-                }
-
-                this.applyClasses(wrapper, classes);
-                inner.classList.add("tile-inner");
-                inner.textContent = tile.value;
-
-                wrapper.appendChild(inner);
-                this.tileContainer.appendChild(wrapper);
-                this.tileMap.set(tile, wrapper);
-
-                if (tile.previousPosition) {
-                    window.requestAnimationFrame(() => {
-                        classes[2] = this.positionClass({ x: tile.x, y: tile.y });
-                        this.applyClasses(wrapper, classes);
-                    });
-                }
-            } else {
-                // GÜNCELLEME
-                const inner = wrapper.querySelector(".tile-inner");
-                // Yeni pozisyon
-                classes[2] = this.positionClass({ x: tile.x, y: tile.y });
-
-                if (tile.mergedFrom) classes.push("tile-merged");
-
-                this.applyClasses(wrapper, classes);
-                
-                if (inner.textContent != tile.value) {
-                    inner.textContent = tile.value;
+        function addRandomTile() {
+            let emptyCells = [];
+            for(let r=0; r<SIZE; r++){
+                for(let c=0; c<SIZE; c++){
+                    if(!grid[r][c]) emptyCells.push({r, c});
                 }
             }
-
-            // Merge edilen alt parçaları da kısa süre tutmak için işle
-            if (tile.mergedFrom) {
-                tile.mergedFrom.forEach(merged => {
-                    this.syncTile(merged, processedTiles);
-                });
+            if(emptyCells.length > 0) {
+                let cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                let val = Math.random() < 0.5 ? 1 : 2; 
+                // Rarely a 3 in initial setup, but kept simple here
+                grid[cell.r][cell.c] = { value: val, id: Math.random() };
             }
         }
 
-        continueGame() {
-            this.clearMessage();
-        }
-
-        applyClasses(element, classes) {
-            element.className = classes.join(" ");
-        }
-
-        normalizePosition(position) {
-            return { x: position.x + 1, y: position.y + 1 };
-        }
-
-        positionClass(position) {
-            position = this.normalizePosition(position);
-            return "tile-position-" + position.x + "-" + position.y;
-        }
-
-        // --- PUAN GÜNCELLEME DÜZELTMESİ ---
-        updateScore(score) {
-            // Eğer puan değişmediyse hiçbir şey yapma (titremeyi önler)
-            if (this.score === score) return;
-
-            const difference = score - this.score;
-            this.score = score;
-            
-            // Sadece metni güncelle, container'ı silme!
-            // score-container içindeki ilk text node'u bul veya direkt textContent kullanmak yerine
-            // mevcut yapıyı bozmadan güncellemek lazım.
-            // En güvenli yol: temizleyip yeniden eklemek ama "animasyon" divini bozmadan.
-            
-            // Basit ve hatasız yöntem: İçeriği temizle ama sadece TEXT node'u güncelle
-            // Ancak best practice olarak CSS'deki :after "SCORE" yazısını bozmamak için
-            // sadece sayıyı güncellemeliyiz.
-            
-            // Mevcut yapıda container sadece sayıyı tutuyor, :after ile etiket geliyor.
-            // O yüzden textContent güvenli.
-            
-            this.scoreContainer.textContent = this.score;
-
-            if (difference > 0) {
-                const addition = document.createElement("div");
-                addition.classList.add("score-addition");
-                addition.textContent = "+" + difference;
-                this.scoreContainer.appendChild(addition);
-                
-                // Animasyon bitince DOM'dan sil
-                setTimeout(() => {
-                    if (addition.parentNode) {
-                        addition.parentNode.removeChild(addition);
-                    }
-                }, 600);
-            }
-        }
-
-        updateBestScore(bestScore) {
-            this.bestContainer.textContent = bestScore;
-        }
-
-        updateNextTile(nextValue) {
-            const currentText = this.nextTileContainer.querySelector(".next-tile")?.textContent;
-            if (currentText == nextValue) return;
-
-            // Burayı temizlemekte sorun yok, sık değişmez
-            while (this.nextTileContainer.firstChild) {
-                this.nextTileContainer.removeChild(this.nextTileContainer.firstChild);
-            }
-
-            if (nextValue) {
-                const nextTile = document.createElement("div");
-                nextTile.classList.add("next-tile", "tile-" + nextValue);
-                nextTile.textContent = nextValue;
-                
-                const label = document.createElement("span");
-                label.textContent = "Next:";
-                label.style.fontSize = "14px";
-                label.style.marginRight = "5px";
-                
-                this.nextTileContainer.appendChild(label);
-                this.nextTileContainer.appendChild(nextTile);
-            }
-        }
-
-        message(won) {
-            const type = won ? "game-won" : "game-over";
-            const message = won ? "You win!" : "Game over!";
-            this.messageContainer.classList.add(type);
-            this.messageContainer.getElementsByTagName("p")[0].textContent = message;
-        }
-
-        clearMessage() {
-            this.messageContainer.classList.remove("game-won", "game-over");
-        }
-    }
-
-    // --- GAME CLASS ---
-    class Game {
-        constructor(size, InputManager, Actuator) {
-            this.size = size;
-            this.inputManager = new InputManager();
-            this.actuator = new Actuator();
-            this.startTiles = 2;
-            this.inputManager.on("move", this.move.bind(this));
-            this.inputManager.on("restart", this.restart.bind(this));
-            this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
-            this.setup();
-        }
-
-        restart() {
-            this.actuator.continueGame();
-            this.setup();
-        }
-
-        keepPlaying() {
-            this.keepPlaying = true;
-            this.actuator.continueGame();
-        }
-
-        isGameTerminated() {
-            return this.over || (this.won && !this.keepPlaying);
-        }
-
-        setup() {
-            this.grid = new Grid(this.size);
-            this.score = 0;
-            this.over = false;
-            this.won = false;
-            this.keepPlaying = false;
-            this.nextTileValue = this.pickNextTile();
-            this.addStartTiles();
-            this.actuate();
-        }
-
-        addStartTiles() {
-            for (let i = 0; i < this.startTiles; i++) {
-                this.addRandomTile();
-            }
-        }
-
-        addRandomTile() {
-            if (this.grid.cellsAvailable()) {
-                const value = this.nextTileValue;
-                const tile = new Tile(this.grid.randomAvailableCell(), value);
-                this.grid.insertTile(tile);
-                this.nextTileValue = this.pickNextTile();
-            }
-        }
-
-        pickNextTile() {
+        function setNextTile() {
+            // Threes logic: next tile is usually in a "deck"
+            // Simplified: Random 1, 2, or 3 (bonus)
             const r = Math.random();
-            if (r < 0.45) return 1;
-            if (r < 0.90) return 2;
-            return 3;
+            if (r < 0.4) nextTileValue = 1;
+            else if (r < 0.8) nextTileValue = 2;
+            else nextTileValue = 3;
+
+            // Update UI indicator color
+            nextTileIndicator.className = 'w-4 h-4 rounded inline-block ' + 
+                (nextTileValue === 1 ? 'bg-[#60d6fa]' : 
+                 nextTileValue === 2 ? 'bg-[#ff5c77]' : 'bg-white border border-gray-300');
+            nextTileIndicator.innerText = nextTileValue > 2 ? '+' : '';
         }
 
-        actuate() {
-            if (localStorage.getItem("bestScore") < this.score) {
-                localStorage.setItem("bestScore", this.score);
-            }
-            this.actuator.actuate(this.grid, {
-                score: this.score,
-                over: this.over,
-                won: this.won,
-                bestScore: localStorage.getItem("bestScore") || 0,
-                terminated: this.isGameTerminated(),
-                nextTile: this.nextTileValue
-            });
-        }
-
-        prepareTiles() {
-            this.grid.eachCell(function (x, y, tile) {
-                if (tile) {
-                    tile.mergedFrom = null;
-                    tile.savePosition();
-                }
-            });
-        }
-
-        moveTile(tile, cell) {
-            this.grid.cells[tile.x][tile.y] = null;
-            this.grid.cells[cell.x][cell.y] = tile;
-            tile.updatePosition(cell);
-        }
-
-        move(direction) {
-            const self = this;
-            if (this.isGameTerminated()) return;
-
-            let cell, tile;
-            const vector = this.getVector(direction);
-            const traversals = this.buildTraversals(vector);
-            let moved = false;
-
-            this.prepareTiles();
-
-            traversals.x.forEach(function (x) {
-                traversals.y.forEach(function (y) {
-                    cell = { x: x, y: y };
-                    tile = self.grid.cellContent(cell);
-
-                    if (tile) {
-                        const next = { x: x + vector.x, y: y + vector.y };
-                        if (self.grid.withinBounds(next)) {
-                            const content = self.grid.cellContent(next);
-                            if (!content) {
-                                self.moveTile(tile, next);
-                                moved = true;
-                            } else if (self.canMerge(tile, content) && !content.mergedFrom) {
-                                const merged = new Tile(next, self.getMergedValue(tile, content));
-                                merged.mergedFrom = [tile, content];
-                                self.grid.insertTile(merged);
-                                self.grid.removeTile(tile);
-                                tile.updatePosition(next);
-                                self.score += self.getScore(merged.value);
-                                if (merged.value === 6144) self.won = true;
-                                moved = true;
-                            }
-                        }
+        function drawGrid() {
+            tileContainer.innerHTML = '';
+            for(let r=0; r<SIZE; r++){
+                for(let c=0; c<SIZE; c++){
+                    if(grid[r][c]) {
+                        createTileElement(r, c, grid[r][c]);
                     }
-                });
-            });
+                }
+            }
+        }
+
+        function createTileElement(r, c, tileData) {
+            const el = document.createElement('div');
+            el.className = `tile tile-${tileData.value > 384 ? '384' : tileData.value}`;
+            el.textContent = tileData.value;
+            
+            // Position calculation
+            // grid padding: 10px. gap: 10px. cell: 62.5px.
+            // left = 10 + c * (62.5 + 10)
+            const left = 10 + c * 72.5;
+            const top = 10 + r * 72.5;
+            
+            el.style.transform = `translate(${left}px, ${top}px)`;
+            
+            // If it's a new merged tile, pop animation?
+            // (omitted for brevity, utilizing CSS transition)
+            
+            tileContainer.appendChild(el);
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreEl.textContent = score;
+        }
+
+        // --- Move Logic (The Heart of Threes) ---
+        // Unlike 2048, Threes shifts the board by 1 unit, inserting a new tile at the edge.
+
+        function move(direction) {
+            if (gameOver) return;
+
+            // Direction: 0:Up, 1:Right, 2:Down, 3:Left
+            // Delta for r, c
+            const dr = [-1, 0, 1, 0][direction];
+            const dc = [0, 1, 0, -1][direction];
+
+            let moved = false;
+            let merged = Array(SIZE).fill().map(() => Array(SIZE).fill(false));
+            
+            // Order of processing matters. 
+            // Up (dr=-1): Process row 0 to 3? No, we check if items can move INTO the space.
+            // We iterate from the destination side backwards.
+            
+            let traverseR = [], traverseC = [];
+            for(let i=0; i<SIZE; i++) {
+                traverseR.push(i);
+                traverseC.push(i);
+            }
+
+            // If moving Down (1) or Right (1), we traverse from end to start to avoid overwriting
+            if (dr === 1) traverseR.reverse();
+            if (dc === 1) traverseC.reverse();
+
+            // Store current state to check changes
+            const originalGrid = JSON.stringify(grid);
+
+            // Logic:
+            // Shift the whole board.
+            // A move is valid if at least one tile moves.
+            // A tile moves if the target cell is empty OR can merge.
+            
+            // We need to process columns individually for vertical moves, rows for horizontal.
+            // Because in Threes, if one column is blocked, it doesn't move, but others might.
+            
+            let linesMoved = 0; // Track specifically which lines moved to insert new tiles
+
+            if (dc === 0) { // Vertical Move
+                for (let c = 0; c < SIZE; c++) {
+                    // Check if this column can shift
+                    if (canShiftLine(c, dr, true)) {
+                        shiftLine(c, dr, true);
+                        linesMoved++;
+                        moved = true;
+                        // Insert new tile at the entry point
+                        let entryR = dr === 1 ? 0 : SIZE - 1; // If moving down, enters top. 
+                        grid[entryR][c] = { value: nextTileValue, id: Math.random() };
+                    }
+                }
+            } else { // Horizontal Move
+                for (let r = 0; r < SIZE; r++) {
+                    if (canShiftLine(r, dc, false)) {
+                        shiftLine(r, dc, false);
+                        linesMoved++;
+                        moved = true;
+                        let entryC = dc === 1 ? 0 : SIZE - 1;
+                        grid[r][entryC] = { value: nextTileValue, id: Math.random() };
+                    }
+                }
+            }
 
             if (moved) {
-                this.addRandomTile();
-                if (!this.movesAvailable()) {
-                    this.over = true;
-                }
-                this.actuate();
+                drawGrid();
+                setNextTile(); // Prep next card
+                checkGameOver();
+            } else {
+                 // Shake animation on grid to indicate blocked move
+                 gridEl.classList.add('shake');
+                 setTimeout(() => gridEl.classList.remove('shake'), 300);
             }
         }
 
-        canMerge(t1, t2) {
-            if ((t1.value === 1 && t2.value === 2) || (t1.value === 2 && t2.value === 1)) return true;
-            if (t1.value > 2 && t1.value === t2.value) return true;
+        // isVertical: true for cols, false for rows
+        function canShiftLine(index, delta, isVertical) {
+            // We check if the leading edge can move or push.
+            // In Threes, the "Edge" is the side we are moving towards.
+            // e.g. Moving UP (delta -1), we look at row 0. 
+            // If row 0 is empty, everything shifts? No, in Threes, items only shift if they are pushed against the wall or a merge happens.
+            // Actually, simply: iterate from the direction we are moving TO.
+            
+            // Let's model it:
+            // 1. Get the line as an array.
+            // 2. Try to shift elements by 1 index.
+            // 3. If arr[i] moves to arr[i-1], arr[i-1] must be empty or mergeable.
+            
+            let line = [];
+            for(let i=0; i<SIZE; i++) {
+                line.push(isVertical ? grid[i][index] : grid[index][i]);
+            }
+
+            // Delta -1 means moving towards index 0.
+            // Delta 1 means moving towards index 3.
+            
+            // If moving to 0 (Up/Left):
+            if (delta === -1) {
+                // Check from 0 to 3. 
+                for (let i = 0; i < SIZE - 1; i++) {
+                     // Can line[i+1] move into line[i]?
+                     let current = line[i+1];
+                     let target = line[i];
+                     
+                     if (!current) continue; // Nothing to move
+                     
+                     if (!target) return true; // Empty space, can shift
+                     if (canMerge(current.value, target.value)) return true; // Merge, can shift
+                }
+                // If the board is full but the edge is empty? No, Threes fills edge.
+            } 
+            // If moving to 3 (Down/Right):
+            else {
+                for (let i = SIZE - 1; i > 0; i--) {
+                    let current = line[i-1];
+                    let target = line[i];
+                    if (!current) continue;
+                    
+                    if (!target) return true;
+                    if (canMerge(current.value, target.value)) return true;
+                }
+            }
+
             return false;
         }
 
-        getMergedValue(t1, t2) {
-            return t1.value + t2.value;
-        }
-
-        getScore(value) {
-            return value;
-        }
-
-        getVector(direction) {
-            const map = {
-                0: { x: 0, y: -1 },
-                1: { x: 1, y: 0 },
-                2: { x: 0, y: 1 },
-                3: { x: -1, y: 0 }
-            };
-            return map[direction];
-        }
-
-        buildTraversals(vector) {
-            const traversals = { x: [], y: [] };
-            for (let pos = 0; pos < this.size; pos++) {
-                traversals.x.push(pos);
-                traversals.y.push(pos);
+        function shiftLine(index, delta, isVertical) {
+            // Perform the shift
+             let line = [];
+            for(let i=0; i<SIZE; i++) {
+                line.push(isVertical ? grid[i][index] : grid[index][i]);
             }
-            if (vector.x === 1) traversals.x.reverse();
-            if (vector.y === 1) traversals.y.reverse();
-            return traversals;
-        }
 
-        movesAvailable() {
-            return this.grid.cellsAvailable() || this.tileMatchesAvailable();
-        }
+            if (delta === -1) { // Shift Left/Up (Indices decrease)
+                 for (let i = 0; i < SIZE - 1; i++) {
+                     let current = line[i+1];
+                     let target = line[i];
+                     if (!current) continue; // Skip empty source
+                     
+                     if (!target) {
+                         // Move to empty
+                         line[i] = current;
+                         line[i+1] = null;
+                     } else if (canMerge(current.value, target.value)) {
+                         // Merge
+                         let newVal = current.value + target.value;
+                         line[i] = { value: newVal, id: target.id }; // Keep id stable? or new?
+                         line[i+1] = null;
+                         updateScore(newVal); // Score is the face value of created tile
+                         // Important: In Threes, a merge stops the shift for that specific interaction in this step? 
+                         // No, the whole line shifts 1 unit. 
+                         // But we only process one merge per line per turn usually?
+                         // For simplicity in this implementation, we allow the shift.
+                         break; // One merge per line per move usually in simplified logic to prevent cascading
+                     }
+                 }
+            } else { // Shift Right/Down (Indices increase)
+                for (let i = SIZE - 1; i > 0; i--) {
+                    let current = line[i-1];
+                    let target = line[i];
+                    if (!current) continue;
 
-        tileMatchesAvailable() {
-            const self = this;
-            let tile;
-            for (let x = 0; x < this.size; x++) {
-                for (let y = 0; y < this.size; y++) {
-                    tile = this.grid.cellContent({ x: x, y: y });
-                    if (tile) {
-                        for (let direction = 0; direction < 4; direction++) {
-                            const vector = self.getVector(direction);
-                            const cell = { x: x + vector.x, y: y + vector.y };
-                            const other = self.grid.cellContent(cell);
-                            if (other && self.canMerge(tile, other)) {
-                                return true;
-                            }
-                        }
+                    if (!target) {
+                        line[i] = current;
+                        line[i-1] = null;
+                    } else if (canMerge(current.value, target.value)) {
+                        let newVal = current.value + target.value;
+                        line[i] = { value: newVal, id: target.id };
+                        line[i-1] = null;
+                        updateScore(newVal);
+                        break;
                     }
                 }
             }
+
+            // Write back
+            for(let i=0; i<SIZE; i++) {
+                if (isVertical) grid[i][index] = line[i];
+                else grid[index][i] = line[i];
+            }
+        }
+
+        function canMerge(v1, v2) {
+            if (v1 === 1 && v2 === 2) return true;
+            if (v1 === 2 && v2 === 1) return true;
+            if (v1 > 2 && v2 > 2 && v1 === v2) return true;
             return false;
         }
-    }
 
-    // --- MAIN ---
-    window.requestAnimationFrame(function () {
-        new Game(4, InputManager, HTMLActuator);
-    });
-  </script>
+        function checkGameOver() {
+            // Game over if no moves possible
+            // 1. Are there empty cells?
+            for(let r=0; r<SIZE; r++)
+                for(let c=0; c<SIZE; c++)
+                    if(!grid[r][c]) return;
+
+            // 2. Can any line shift?
+            // Check rows (Horiz)
+            for (let r=0; r<SIZE; r++) {
+                 if(canShiftLine(r, 1, false) || canShiftLine(r, -1, false)) return;
+            }
+            // Check cols (Vert)
+            for (let c=0; c<SIZE; c++) {
+                if(canShiftLine(c, 1, true) || canShiftLine(c, -1, true)) return;
+            }
+
+            gameOver = true;
+            if(score > 0) {
+                // Slight delay for visual effect
+                setTimeout(() => {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }, 1000);
+            }
+        }
+
+        // --- Inputs ---
+        function setupInput() {
+            document.addEventListener('keydown', (e) => {
+                if (modal.classList.contains('flex')) return; // Input open
+
+                switch(e.key) {
+                    case 'ArrowUp': move(0); break;
+                    case 'ArrowRight': move(1); break;
+                    case 'ArrowDown': move(2); break;
+                    case 'ArrowLeft': move(3); break;
+                }
+            });
+
+            // Touch support
+            let touchStartX = 0;
+            let touchStartY = 0;
+            const gameEl = document.querySelector('.game-container');
+
+            gameEl.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartY = e.changedTouches[0].screenY;
+                e.preventDefault();
+            }, {passive: false});
+
+            gameEl.addEventListener('touchend', (e) => {
+                if (modal.classList.contains('flex')) return;
+
+                let touchEndX = e.changedTouches[0].screenX;
+                let touchEndY = e.changedTouches[0].screenY;
+                
+                let dx = touchEndX - touchStartX;
+                let dy = touchEndY - touchStartY;
+
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    // Horizontal
+                    if (Math.abs(dx) > 30) move(dx > 0 ? 1 : 3);
+                } else {
+                    // Vertical
+                    if (Math.abs(dy) > 30) move(dy > 0 ? 2 : 0);
+                }
+                e.preventDefault();
+            }, {passive: false});
+        }
+
+        // --- Firestore Scoreboard ---
+
+        window.submitScore = async function() {
+            if (!currentUser) return;
+            const name = nameInput.value.trim() || "Anonim";
+            
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'scores'), {
+                    name: name,
+                    score: score,
+                    timestamp: Date.now(),
+                    userId: currentUser.uid
+                });
+                closeModal();
+                resetGame(); // Auto restart after save
+            } catch (e) {
+                console.error("Skor kaydedilemedi:", e);
+                alert("Hata oluştu, skor kaydedilemedi.");
+            }
+        }
+
+        window.closeModal = function() {
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function loadScores() {
+            if (!currentUser) return;
+            
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+            
+            onSnapshot(q, (snapshot) => {
+                const scores = [];
+                snapshot.forEach(doc => {
+                    scores.push(doc.data());
+                });
+
+                // Client-side sorting (Rule 2 compliant)
+                scores.sort((a, b) => b.score - a.score);
+                
+                // Keep top 50
+                const topScores = scores.slice(0, 50);
+                
+                renderScoreboard(topScores);
+            }, (error) => {
+                console.error("Scoreboard error:", error);
+            });
+        }
+
+        function renderScoreboard(scores) {
+            const list = document.getElementById('scoreboard-list');
+            list.innerHTML = '';
+            
+            if (scores.length === 0) {
+                list.innerHTML = '<div class="text-center text-gray-400 py-4">Henüz skor yok. İlk sen ol!</div>';
+                return;
+            }
+
+            scores.forEach((s, index) => {
+                const el = document.createElement('div');
+                el.className = 'scoreboard-entry flex justify-between items-center p-2 rounded cursor-default border-b border-gray-100 last:border-0';
+                
+                // Crown for top 3
+                let rankDisplay = `<span class="font-bold text-gray-400 w-6">${index + 1}.</span>`;
+                if (index === 0) rankDisplay = `<span class="w-6 text-yellow-500">👑</span>`;
+                if (index === 1) rankDisplay = `<span class="w-6 text-gray-400">🥈</span>`;
+                if (index === 2) rankDisplay = `<span class="w-6 text-orange-400">🥉</span>`;
+
+                el.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        ${rankDisplay}
+                        <span class="font-semibold text-gray-700 truncate max-w-[120px]">${escapeHtml(s.name)}</span>
+                    </div>
+                    <span class="font-bold text-blue-600">${s.score}</span>
+                `;
+                list.appendChild(el);
+            });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Start
+        initGame();
+
+    </script>
 </body>
 </html>
